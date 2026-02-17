@@ -32,8 +32,28 @@ public final class RuleTextReplacer {
 		return LegacyComponentSerializer.legacySection().deserialize(message).replaceText(b -> b.match(pattern).replacement((matchResult, builder) -> {
 			this.changed = true;
 
-			if (replacement.startsWith("@prolong "))
-				return PlainTextComponentSerializer.plainText().deserialize(CommonCore.duplicate(replacement.replace("@prolong ", ""), matchResult.group().length()) + (matchResult.group().endsWith(" ") ? " " : ""));
+			if (replacement.startsWith("@prolong")) {
+				int groupIndex = 0; // default: entire match
+				String charPart = replacement;
+				
+				if (replacement.startsWith("@prolong:")) {
+					// Parse "@prolong:N <char>"
+					int spaceIndex = replacement.indexOf(' ');
+					String groupPart = replacement.substring(9, spaceIndex); // after "@prolong:"
+					groupIndex = Integer.parseInt(groupPart);
+					charPart = replacement.substring(spaceIndex + 1);
+				} else {
+					// Legacy "@prolong <char>"
+					charPart = replacement.replace("@prolong ", "");
+				}
+				
+				String group = matchResult.group(groupIndex);
+				int length = group != null ? group.length() : 0;
+				
+				return PlainTextComponentSerializer.plainText().deserialize(
+					CommonCore.duplicate(charPart, length) + (matchResult.group().endsWith(" ") ? " " : "")
+				);
+			}
 
 			return PlainTextComponentSerializer.plainText().deserialize(replacement);
 		}));
