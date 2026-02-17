@@ -314,17 +314,35 @@ public final class Variables {
 	public String replaceLegacy(@NonNull String message) {
 		message = this.replaceLegacy0(message);
 
-		if (legacyPlaceholderAPIparser != null)
-			message = legacyPlaceholderAPIparser.apply(this.audience, message);
+		message = this.applyLegacyPlaceholderAPIParser(message);
 
 		message = this.replaceLegacy0(message);
 
-		if (legacyPlaceholderAPIparser != null)
-			message = legacyPlaceholderAPIparser.apply(this.audience, message);
+		message = this.applyLegacyPlaceholderAPIParser(message);
 
 		// Parse {message} as last to prevent parsing vars inside of it.
 		if (message.contains("{message}"))
 			message = message.replace("{message}", this.getValueAsString("message", "message"));
+
+		return message;
+	}
+
+	private String applyLegacyPlaceholderAPIParser(@NonNull String message) {
+		if (legacyPlaceholderAPIparser != null) {
+			message = legacyPlaceholderAPIparser.apply(this.audience, message);
+
+			message = HEX_AMPERSAND_PATTERN.matcher(message).replaceAll("<#$1>");
+
+			Matcher md5Matcher = HEX_MD5_PATTERN.matcher(message);
+			StringBuffer buffer = new StringBuffer();
+			while (md5Matcher.find()) {
+				String legacyFormat = md5Matcher.group();
+				String hexColor = legacyFormat.replaceAll("[" + CompChatColor.COLOR_CHAR + "]", "").substring(1);
+				md5Matcher.appendReplacement(buffer, "<#" + hexColor + ">");
+			}
+			md5Matcher.appendTail(buffer);
+			message = buffer.toString();
+		}
 
 		return message;
 	}
