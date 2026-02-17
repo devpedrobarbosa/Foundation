@@ -199,6 +199,25 @@ public final class ProxyUtil {
 	 * through which we send the proxy message as
 	 */
 	private static Player findFirstPlayer() {
-		return Remain.getOnlinePlayers().isEmpty() ? null : Remain.getOnlinePlayers().iterator().next();
+		Debugger.debug("proxy", "Finding a player to send the plugin message through since the provided sender was null...");
+		if(Remain.getOnlinePlayers().isEmpty())
+			return null;
+
+		Player result = null;
+
+		// Avoid sending messages through fake players or NPCs, as they may not be properly handled by the proxy and can cause issues. We will skip them and try to find a real player.
+		for(final Player player : Remain.getOnlinePlayers()) {
+			if(player.hasMetadata("NPC") || player.hasMetadata("fake-player")) {
+				Debugger.debug("proxy", "Skipping player " + player.getName() + " as plugin message sender because it is an NPC or fake player.");
+				continue;
+			}
+
+			result = player;
+			break;
+		}
+
+		Debugger.debug("proxy", result == null ? "Found no players matching the required specifications to serve as a plugin message sender" : "Found player " + result.getName() + " (uuid: " + result.getUniqueId() + ") to send the plugin message through.");
+
+		return result;
 	}
 }

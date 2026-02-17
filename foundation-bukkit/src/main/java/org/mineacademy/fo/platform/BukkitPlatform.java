@@ -682,6 +682,8 @@ final class BukkitPlatform extends FoundationPlatform {
 
 		if (player != null && player.isOnline())
 			player.sendPluginMessage(BukkitPlugin.getInstance(), channel, array);
+		else
+			CommonCore.warning("Cannot send plugin message to " + senderUid + " as the player is not online!");
 	}
 
 	@Override
