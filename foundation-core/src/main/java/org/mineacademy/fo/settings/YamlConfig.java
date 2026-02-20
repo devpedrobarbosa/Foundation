@@ -33,8 +33,7 @@ import org.snakeyaml.engine.v2.common.FlowStyle;
 import org.snakeyaml.engine.v2.common.ScalarStyle;
 import org.snakeyaml.engine.v2.constructor.ConstructScalar;
 import org.snakeyaml.engine.v2.constructor.StandardConstructor;
-import org.snakeyaml.engine.v2.exceptions.ParserException;
-import org.snakeyaml.engine.v2.exceptions.ScannerException;
+import org.snakeyaml.engine.v2.exceptions.YamlEngineException;
 import org.snakeyaml.engine.v2.nodes.AnchorNode;
 import org.snakeyaml.engine.v2.nodes.MappingNode;
 import org.snakeyaml.engine.v2.nodes.Node;
@@ -165,7 +164,7 @@ public class YamlConfig extends FileConfig {
 		try {
 			rawNode = this.composer.composeString(contents).orElse(null);
 
-		} catch (IndexOutOfBoundsException | ScannerException | ParserException ex) {
+		} catch (IndexOutOfBoundsException | YamlEngineException ex) {
 			throw new YamlSyntaxError(ex, this.getFile());
 		}
 
